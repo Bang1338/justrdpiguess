@@ -1,0 +1,38 @@
+name: Window
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: download ngrok
+        shell: powershell
+        run: |
+          Invoke-WebRequest https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-windows-amd64.zip -OutFile ngrok.zip
+          Expand-Archive ngrok.zip
+      - name: run ngrok
+        shell: powershell
+        run: |
+          .\ngrok\ngrok.exe authtoken $Env:NGROK_AUTH_TOKEN
+          Start-Process Powershell -ArgumentList '-Noexit -Command ".\ngrok\ngrok.exe tcp 3389"'
+        env:
+          NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+          
+      - name: Activating RDP access.
+        run: | 
+          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server'-name "fDenyTSConnections" -Value 0
+          Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
+        
+      - name: Change pass for RDP.
+        env: 
+          ADMINPASSWORD: ${{ secrets.ADMINPASSWORD }}
+        run: net user runneradmin $Env:ADMINPASSWORD
+        
+      - name: Get Ngrok 
+        run: Invoke-WebRequest http://localhost:4040/api/tunnels
+        
+      - name: Run loop
+        run: ping -t localhost
