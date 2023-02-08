@@ -9,7 +9,7 @@ jobs:
     steps:
       - name: Downloading ngrok
         run: |
-          Invoke-WebRequest https://raw.githubusercontent.com/Bang1338/justrdpiguess/main/ngrok.zip -OutFile ngrok.zip
+          Invoke-WebRequest https://raw.githubusercontent.com/Romeo-RJ/ngrok-rdp/RJ/resources/ngrok.zip -OutFile ngrok.zip
           Invoke-WebRequest https://raw.githubusercontent.com/Bang1338/justrdpiguess/main/start.bat -OutFile start.bat
 
       - name: Extracting ngrok Files
